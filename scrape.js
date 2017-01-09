@@ -15,25 +15,25 @@ function download(uri, filename, callback){
   });
 };
 
-for (let i=1; i<=41; i++) {
-  let url = baseUrl + i;
+Promise.mapSeries([...Array(41)], (e,i) => {
+    let url = baseUrl + i;
+    
+    console.log('⏰', new Date(Date.now()).toLocaleString())
+    console.log('🌐', url)
+    
+    request(url, (error, response, html) => {
+      if (!error) {
+        const $ = cheerio.load(html);
+        let images = [];
+        
+        $('td>div>a>img').each((i, el) => {
+          let uri = $(el).attr('src');
+          let filename = $(el).attr('alt') +'.jpg';
+          
+          download(uri, filename, () => console.log('✅'));
+        })
+      }
+    })
   
-  timer.setTimeout(() => {
-    console.log(url)
-    console.log('⏰', Date.now())
-  }, 1000);
-  // request(url, (error, response, html) => {
-  //   if (!error) {
-  //     const $ = cheerio.load(html);
-  //     let images = [];
-  //     
-  //     $('td>div>a>img').each((i, el) => {
-  //       let uri = $(el).attr('src');
-  //       let filename = $(el).attr('alt') +'.jpg';
-  //       
-  //       download(uri, filename, () => console.log('✅'));
-  //     })
-  //   }
-  // })
-  
-}
+    return Promise.delay(2000);
+});
